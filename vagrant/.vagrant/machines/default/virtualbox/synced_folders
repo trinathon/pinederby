@@ -1,1 +1,0 @@
-{"virtualbox":{"vagrant-root":{"id":"vagrant-root","guestpath":"/var/www/html/pinederby","hostpath":"/home/andrew/Web/Pinederby/pinederby","disabled":false},"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/andrew/Web/Pinederby/vagrant","disabled":false}}}
