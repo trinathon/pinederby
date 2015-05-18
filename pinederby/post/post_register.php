@@ -1,4 +1,6 @@
 <?
+	include('pinederby_db_connect.php');
+
 	// Define an array to return
 	$result = array(
 		"error" => null,

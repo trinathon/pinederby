@@ -24,7 +24,7 @@
         var username = $('#inputEmail').val();
         $.ajax({
           type: 'POST',
-          url: 'post/register.php',
+          url: 'post/post_register.php',
           dataType: 'json',
           data: {
             username: username,
@@ -60,7 +60,7 @@
   <body>
     <div class="container login">
       <div class="form-signin">
-        <img class="img-responsive" src="" alt="LOGO GOES HERE">
+        <img class="img-responsive" src="images/car-logo.png" alt="LOGO GOES HERE">
       </div>
 
       <div class="row">
