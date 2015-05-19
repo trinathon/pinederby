@@ -65,7 +65,7 @@
 
       <div class="row">
         <div id="manageColumn" class="col-6-md">
-          <form id="userInfo" class="form-signin" role="form" onsubmit="return(false)">
+          <form id="userInfo" class="form-signin" role="form">
             <h2 class="form-signin-heading">Please sign in</h2>
             <label for="inputEmail" class="sr-only">Email address</label>
             <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="">
@@ -77,10 +77,12 @@
               </label>
             </div>
             <button class="btn btn-lg btn-primary" type="submit">Sign in</button>
-            <button class="btn btn-lg btn-success" onclick="register()">Register</button>
+            <a type="button" class="btn btn-lg btn-success" href="register.php">Register</a>
             <div id="result">
             </div>
+
           </form>
+
         </div><!--.manageColumn -->
         <div id="racerRegistrationColumn" class="col-6-md">
           <form id="racerRegistration" class="form-signin" role="form">
