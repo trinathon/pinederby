@@ -19,22 +19,6 @@
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
     <script type="text/javascript">
-      function register(){
-        //todo: finish the register function once the PHP page is completed
-        var username = $('#inputEmail').val();
-        $.ajax({
-          type: 'POST',
-          url: 'post/post_register.php',
-          dataType: 'json',
-          data: {
-            username: username,
-            password: $('#inputPassword').val(),
-          },
-          success: function(json) {
-            console.log(json);
-          }//.success
-        });
-      }
       function login(){
 
 
