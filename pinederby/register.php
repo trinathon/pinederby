@@ -59,7 +59,7 @@ include_once 'includes/functions.php';
                         <label for="username" class="sr-only">Username</label>
                         <input type="text" id="username" name='username' class="form-control" placeholder="Username" required="true" autofocus="">
                         <label for="email" class="sr-only">Email address</label>
-                        <input type="email" id="email" class="form-control" placeholder="Email address" required="true" autofocus="">
+                        <input type="email" id="email" name='email' class="form-control" placeholder="Email address" required="true" autofocus="">
 
                         <label for="password" class="sr-only">Password</label>
                         <input type="password" id="password" name="password" class="form-control" placeholder="Password" required="true">

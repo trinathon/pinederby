@@ -1,15 +1,25 @@
+<?php
+  include_once 'includes/db_connect.php';
+  include_once 'includes/functions.php';
+   
+  sec_session_start();
+   
+  if (login_check($mysqli) == true) {
+      $logged = 'in';
+  } else {
+  	  $logged = 'out';
+      //header('Location: ../index.php');
+  }
+  echo "LOGGED: ".$logged."\n";
+?>
 <DOCTYPE HTML>
 <html>
 <head>
-
-
 	<!-- Custom CSS -->
 	<style>
 	.wrapper{
 		padding: 10px;
 	}
-
-
 	</style>
 </head>
 <body>
@@ -71,7 +81,7 @@
 					</li>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
-					<li><a href="#">Logout</a></li>
+					<li><a href="includes/logout.php">Logout</a></li>
 				</ul>
 			</div><!-- /.navbar-collapse -->
 		</div><!-- /.container-fluid -->
@@ -146,9 +156,25 @@
 		//todo: function to load the selected derby
 
 
-
+	}
+	function refreshDerbyList(){
+		var userId = "<?php echo $_SESSION('user_id'); ?>";
+		getDerbys("<?php echo $_SESSION('user_id'); ?>").done(function(data) {
+			console.log(data);
+		});
 
 	}
+	function getDerbys(userId){
+		var dynamicData = {};
+		dynamicData["id"] = personID;
+		return $.ajax({
+			url: "post/get_derbys.php",
+			type: "get",
+			data: dynamicData,
+			dataType: 'json'
+		});
+	}
+
 
 </body>
 </html>

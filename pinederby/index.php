@@ -1,3 +1,15 @@
+<?php
+  include_once 'includes/db_connect.php';
+  include_once 'includes/functions.php';
+   
+  sec_session_start();
+   
+  if (login_check($mysqli) == true) {
+    $logged = 'in';
+  } else {
+    $logged = 'out';
+  }
+?>
 <DOCTYPE html>
 <html lang="en">
   <head>
@@ -18,14 +30,9 @@
     <!-- Bootstrap -->
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
-    <script type="text/javascript">
-      function login(){
-
-
-      }
-
-
-    </script>
+    <!-- Login Scripts -->
+    <script src="js/sha512.js"></script>
+    <script src="js/forms.js"></script>
 
     <!-- Bootstrap core CSS -->
     <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -49,18 +56,23 @@
 
       <div class="row">
         <div id="manageColumn" class="col-6-md">
-          <form id="userInfo" class="form-signin" role="form">
+          <?php
+            if (isset($_GET['error'])) {
+                echo '<p class="error">Error Logging In!</p>';
+            }
+          ?>
+          <form id="userInfo" class="form-signin" role="form" action="includes/process_login.php" method="post" name="login_form">
             <h2 class="form-signin-heading">Please sign in</h2>
-            <label for="inputEmail" class="sr-only">Email address</label>
-            <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="">
-            <label for="inputPassword" class="sr-only">Password</label>
-            <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="">
-            <div class="checkbox">
+            <label for="email" class="sr-only">Email address</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="Email address" required="" autofocus="">
+            <label for="password" class="sr-only">Password</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Password" required="">
+            <!--<div class="checkbox">
               <label>
               <input type="checkbox" value="remember-me"> Remember me
               </label>
-            </div>
-            <button class="btn btn-lg btn-primary" type="submit">Sign in</button>
+            </div>-->
+            <button class="btn btn-lg btn-primary" type="submit" onclick="formhash(this.form, this.form.password);">Sign in</button>
             <a type="button" class="btn btn-lg btn-success" href="register.php">Register</a>
             <div id="result">
             </div>
