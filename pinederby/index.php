@@ -56,12 +56,18 @@
 
       <div class="row">
         <div id="manageColumn" class="col-6-md">
-          <?php
-            if (isset($_GET['error'])) {
-                echo '<p class="error">Error Logging In!</p>';
-            }
-          ?>
           <form id="userInfo" class="form-signin" role="form" action="includes/process_login.php" method="post" name="login_form">
+            <!-- Error Handling -->
+            <?php
+              if (isset($_GET['error'])) {
+                  echo '<div class="alert alert-warning"><a href="#" class="close" data-dismiss="alert">&times;</a>';
+                  if($_GET['error']==2){
+                    echo '<strong>Warning!</strong> Invalid Pinewood Derby<br>Please contact your Pinewood derby administrator';
+                  }
+                  echo '</div>';
+              }
+            ?>
+            <!-- Start the FORM! -->
             <h2 class="form-signin-heading">Please sign in</h2>
             <label for="email" class="sr-only">Email address</label>
             <input type="email" id="email" name="email" class="form-control" placeholder="Email address" required="" autofocus="">
@@ -81,10 +87,10 @@
 
         </div><!--.manageColumn -->
         <div id="racerRegistrationColumn" class="col-6-md">
-          <form id="racerRegistration" class="form-signin" role="form">
+          <form id="racerRegistration" class="form-signin" role="form" action="preregister.php">
             <h2 class="form-signin-heading">Derby Pre-registration</h2>
             <label for="inputDerbyId" class="sr-only">Unique Derby ID</label>
-            <input type="text" id="inputDerbyId" class="form-control" placeholder="Unique Derby ID" required="true" autofocus="" style="margin-bottom:10px">
+            <input type="text" name="unique_id" id="inputDerbyId" class="form-control" placeholder="Unique Derby ID" required="true" autofocus="" style="margin-bottom:10px">
             <button class="btn btn-lg btn-primary" type="submit">Pre-Register</button>
             <div>
               <i>This is for racers to register for a derby that has already been created by someone else. You will need to get your unique derby ID from the person managing the derby. 

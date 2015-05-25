@@ -51,17 +51,66 @@
 			refreshDerbyList();
 
 		}
+		function closeDerby(){
+			//todo: function to close the open derby
+			console.log("Close Derby"); //todo: remove debug
+
+
+
+		}
 		function createDerby(){
 			//todo: function to create a derby
 			//		we need the date the derby is to be created 
 			//		the unique ID for pre-registration is only available for 2 weeks prior to the derby
 			//		and can be used 1 day prior and 1 day after to view the presentation view
+			var data = $('#createDerbyForm').serialize();
+			console.log(data); //todo: remove debug
+			$.ajax({
+				type: "POST",
+				url: 'post/post_create_derby.php',
+				data: data,
+				dataType: 'json',
+				success: function( response ) {
+					console.log( response );
+					if(response.error==null){
+						loadDerby(response.derby_id);
+					}
+				}
+			});
 
 		}
 		function loadDerby(derbyId){
+			// Hide the modal if the derby was just created
+			$('#createDerbyModal').modal('hide');
 			//todo: function to load the selected derby
 			console.log('Derby '+derbyId);
 			// Load derby data
+			getDerbyData(derbyId).done(function(derby){
+				console.log(derby);
+
+			});
+			// Set the derby name
+			var derbyName = $('#'+derbyId).attr('name');
+			$('#navDerbyName').html(derbyName);
+			
+			// Add derby tools to the navbar
+			var buttons = $('<li>',{
+				id: 'navDerbyButtons'
+			});
+			var closeButton = $('<button>',{
+				id: 'closeDerbyBtn',
+				type: 'button',
+				class: 'btn btn-danger navbar-btn',
+				html: '<span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>',
+				onclick: 'closeDerby()'
+			});
+
+			buttons.append(closeButton);
+
+			$('#navDerbyTools').append(buttons);
+
+			// Clear the derby list notification
+			$('#notify').html('');
 
 
 			// Hide and show the divs for when a derby is loaded
@@ -81,7 +130,8 @@
 				    var derby = derbys[i];
 				    var derbyLi = $('<li>',{
 				    	id:derby.derby_id,
-				    	html:"<a href='#' onclick='loadDerby("+derby.derby_id+")'>"+derby.name+"</a>"
+				    	html:"<a href='#' onclick='loadDerby("+derby.derby_id+")'>"+derby.name+"</a>",
+				    	name: derby.name
 				    });
 				    $('#derbyList').prepend(derbyLi);
 				    $('#notify').html('<span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span> Derby List');
@@ -99,13 +149,24 @@
 				dataType: 'json'
 			});
 		}
+		function getDerbyData(derbyId){
+			var dynamicData = {};
+			dynamicData["id"] = derbyId;
+			return $.ajax({
+				url: "post/get_derby_data.php",
+				type: "get",
+				data: dynamicData,
+				dataType: 'json'
+			});
+
+		}
 	</script>
 </head>
 <body>
 <div id="container">
 
 	<!-- Modals -->
-	<!-- Login -->
+	<!-- Create Derby Modal -->
 	<div class="modal " id="createDerbyModal" tabindex="-1" role="dialog" aria-labelledby="itemBidLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -114,28 +175,33 @@
 					<h4 class="modal-title" id="loginLabel">Pinewood Racer</h4>
 				</div>
 				<div id="modal-body" class="modal-body">
-					<form id="loginForm" role="form">
+					<form id="createDerbyForm" role="form">
 						<div class="form-group">
-							<label for="exampleInputEmail1">Email address</label>
-							<input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+							<label for="newDerbyName">Pinewood Derby Name</label>
+							<input type="text" id="newDerbyName" name="newDerbyName" class="form-control" placeholder="Derby Name">
 						</div>
 						<div class="form-group">
-							<label for="exampleInputPassword1">Password</label>
-							<input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+							<label for="newDerbyLanes">Number of Lanes</label>
+							<select id="newDerbyLanes" name="newDerbyLanes" class="form-control">
+								<option>2</option>
+								<option>3</option>
+								<option>4</option>
+							</select>
 						</div>
+					</form>
 				</div>
 				<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-						<button type="submit" class="btn btn-primary" onclick="login()">Login</button>
-					</form>
+						<button type="submit" class="btn btn-primary" onclick="createDerby()">Create</button>
 				</div>
 			</div>
 		</div>
 	</div>
+	<!--./ End Create Derby Modal-->
 
 
 	<!-- Navigation Section -->
-	<nav class="navbar navbar-default" role="navigation">
+	<nav class="navbar navbar-default" role="navigation" style="margin-bottom:10px">
 		<div class="container-fluid">
 			<!-- Brand and toggle get grouped for better mobile display -->
 			<div class="navbar-header">
@@ -158,7 +224,10 @@
 							<li><a href="#" data-toggle="modal" data-target="#createDerbyModal">Create A Derby</a></li>
 						</ul>
 					</li>
-					<li id="navDerbyName">
+					<li id="navDerbyName" class="navbar-text">
+
+					</li>
+					<li id="navDerbyTools">
 
 					</li>
 					<li>
@@ -187,7 +256,8 @@
 
 		<div id="main" class="row" style="display:none;">
 			<div id="heatList" class="col-md-3">
-				<strong>Heat List goes here</strong>
+				<strong>Scores</strong>
+
 			</div>
 			<div id="heatContainer" class="col-md-9">
 				<div id="heatBody" class="row">
