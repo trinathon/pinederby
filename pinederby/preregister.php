@@ -144,7 +144,7 @@
 		</div>
 		<div id="formContainer" class="col-6-md">
 			
-			<form id="userInfo" class="form-signin" role="form" action="includes/process_login.php" method="post" name="login_form">
+			<form id="userInfo" class="form-signin" role="form" action="post/post_preregister_racer.php" method="post" name="login_form">
 				<h2 class="form-signin-heading">Please fill in info</h2>
 				<label for="first_name" class="sr-only">First Name</label>
 				<input type="text" id="first_name" name="first_name" class="form-control" placeholder="First Name" required="true" autofocus="true">
