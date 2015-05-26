@@ -44,7 +44,7 @@
 		$racer = (array) $racer;
 		$racer_ids[] = $racer['racer_id'];
 	}
-
+/*
 	// Get Previous round offsets
 	$rounds = array();
 	$query = "	SELECT *
@@ -85,7 +85,22 @@
 		$result->close();
 	}
 	$number_of_generators = sizeof($generators);
+*/
 
+	// Get unused generators with same number of Lanes
+	//
+	// Check inner select for limiting the rounds query to the current derby
+	//
+	$generator = 0;
+//	$query = "CALL get_next_generator($derby_id,'.$number_of_lanes.')";
+	$query = "SELECT get_next_generator(1,3);"
+	$generator = $mysqli->query($query) or die("Query failed: ".mysql_error());
+		echo "<pre>";
+		var_dump($generator);
+		echo "</pre>";
+		echo "<strong>Generator Id: "$generator"</strong></br>";
+//	$number_of_generators = sizeof($generators);
+/*
 	// Select a random generator that hasn't already been used
 	echo "RANDOM</br>";
 	$rnd_gens = range(1, $number_of_generators); 
@@ -108,5 +123,5 @@
 	$offsets = explode(',', $round_gen['offsets']);
 	echo "</br><strong>Offsets</strong></br>";
 	var_dump($offsets);
-
+*/
 ?>
