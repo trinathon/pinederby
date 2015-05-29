@@ -86,26 +86,32 @@
 	}
 	$number_of_generators = sizeof($generators);
 
-/*
+
 	// Get unused generators with same number of Lanes
 	//
 	// Check inner select for limiting the rounds query to the current derby
 	//
-//	$generator = 0;
-//	$query = "CALL get_next_generator($derby_id,'.$number_of_lanes.')";
-	$query = "SELECT get_next_generator(1,3);"
+	echo "Stored Proc call</br>";
+
+	$generator = 0;
+//	$query = " CALL get_next_generator(1,3); ";
+	$query = " SELECT get_next_generator(1,3); ";
 	if ($result = $mysqli->query($query)) {
-		while($obj = $result->fetch_object()){
-			$generator = $obj;	
-		}
+//		while($obj = $result->fetch_object()){
+//			$generator = $result->current_field();	
+//		}
 		echo "<pre>";
+		var_dump($result);
 		var_dump($generator);
 		echo "</pre>";
-		echo "<strong>Generator Id: "$generator"</strong></br>";
+		echo "<strong>Generator Id: ".$generator."</strong>";
 		$result->close();
 	}
-*/
-	
+	error_log("Oracle database not available!", 0);
+	phpinfo();
+	echo "</br>END Stored Proc call</br>";
+
+
 	// Select a random generator that hasn't already been used
 	echo "RANDOM</br>";
 	$rnd_gens = range(1, $number_of_generators); 
