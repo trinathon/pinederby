@@ -1,4 +1,4 @@
-CREATE DEFINER=`root`@`localhost` PROCEDURE `gen_build`(IN `lc` INT, IN `rc` INT, IN `offsets` VARCHAR(12), IN `segment` INT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `gen_build`(IN `lc` INT, IN `rc` INT, IN `offsets` VARCHAR(12), IN `segment` INT, IN `rsum` INT)
 	LANGUAGE SQL
 	NOT DETERMINISTIC
 	CONTAINS SQL
@@ -17,7 +17,7 @@ BEGIN
 			cseg: BEGIN
 				SET i = i+1;
 				IF NOT FIND_IN_SET(i,offsets) THEN
-					CALL gen_build(lc,rc,CONCAT(offsets,i,','),segment+1);
+					CALL gen_build(lc,rc,CONCAT(offsets,i,','),segment+1,rsum+i);
 				END IF;
 				IF i < rc THEN
 					ITERATE segs;
@@ -35,7 +35,7 @@ BEGIN
 			sgend: BEGIN
 				SET j = j+1;
 				IF NOT FIND_IN_SET(j,offsets) THEN
-					INSERT INTO generators (number_of_lanes,number_of_racers,offsets) VALUES (lc,rc,CONCAT(offsets,j));
+					INSERT INTO generators (number_of_lanes,number_of_racers,offsets,rank) VALUES (lc,rc,CONCAT(offsets,j),rsum+j);
 				END IF;
 				IF j < rc THEN
 					ITERATE segend;
