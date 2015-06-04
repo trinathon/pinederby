@@ -1,13 +1,19 @@
-CREATE DEFINER=`root`@`localhost` PROCEDURE `gen_build`(IN `lc` INT, IN `rc` INT, IN `offsets` VARCHAR(12), IN `segment` INT, IN `rsum` INT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `gen_build`(IN `derby` INT, IN `offsets` VARCHAR(12), IN `segment` INT, IN `rsum` INT)
 	LANGUAGE SQL
 	NOT DETERMINISTIC
 	CONTAINS SQL
 	SQL SECURITY DEFINER
 	COMMENT ''
 BEGIN
+#
+# Sample call; CALL gen_build(2,'',1,0);
+#
 	DECLARE v INT;
+	DECLARE rc,lc INT;
 	SET @@GLOBAL.max_sp_recursion_depth = 255;
 	SET @@session.max_sp_recursion_depth = 255;
+	SELECT d.number_of_lanes INTO lc FROM derbys AS d WHERE d.derby_id = derby;
+	SELECT COUNT(*) INTO rc FROM racers AS r WHERE r.derby_id = derby;
 	SET v=lc-1;
 	IF segment < v THEN
 		BEGIN
@@ -17,7 +23,7 @@ BEGIN
 			cseg: BEGIN
 				SET i = i+1;
 				IF NOT FIND_IN_SET(i,offsets) THEN
-					CALL gen_build(lc,rc,CONCAT(offsets,i,','),segment+1,rsum+i);
+					CALL gen_build(derby,CONCAT(offsets,i,','),segment+1,rsum+i);
 				END IF;
 				IF i < rc THEN
 					ITERATE segs;
