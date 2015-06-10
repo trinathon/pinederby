@@ -1,9 +1,13 @@
-CALL round_build(2);
+#CALL round_build(2);
 #DELETE r FROM rounds AS r WHERE r.derby_id = 2;
 #ALTER TABLE rounds AUTO_INCREMENT = 1;
 
+CALL gen_build(2,'',1,0);
+#DELETE g FROM generators g WHERE g.number_of_lanes=4 AND g.number_of_racers=16;
+#ALTER TABLE generators AUTO_INCREMENT = 7;
+
 #SELECT get_next_generator(derby) INTO g_id,g_offsets;
-#SELECT COUNT(*) FROM generators AS g WHERE g.number_of_lanes = 4 AND g.number_of_racers = 16;
+SELECT COUNT(*) FROM generators AS g WHERE g.number_of_lanes = 4 AND g.number_of_racers = 16;  # 3360 -> 1288
 -- SELECT COUNT(*) FROM generators AS g WHERE
 -- g.number_of_lanes = 4 AND g.number_of_racers = 16
 -- AND ((14 < g.rank AND 16 > g.rank) OR (34 < g.rank AND 38 > g.rank));
@@ -19,9 +23,6 @@ CALL round_build(2);
 -- 
 #SET @@GLOBAL.max_sp_recursion_depth = 255;
 #SET @@session.max_sp_recursion_depth = 255;
--- CALL gen_build(2,'',1,0);
--- DELETE g FROM generators g WHERE g.number_of_lanes=4 AND g.number_of_racers=15;
--- ALTER TABLE generators AUTO_INCREMENT = 7;
 -- --  
 -- SET @lane_cnt=3;
 -- SET @d_id=1;
