@@ -14,7 +14,7 @@ BEGIN
 # insert round object
 # repeat for inverted round
 #
-	DECLARE round_gen,lane_count,racer_count,this_round INT;
+	DECLARE round_gen,lane_count,racer_count,this_round,this_heat INT;
 	DECLARE offsets VARCHAR(12);
 	SELECT d.number_of_lanes INTO lane_count FROM derbys AS d WHERE d.derby_id=derby;
 	
@@ -40,7 +40,15 @@ BEGIN
 #	insert heat in heats and heat/lane/racer in scores
 		
 #		SELECT racer_id FROM racerIds WHERE row_id =i;
-		INSERT INTO debug (round_gen,racer_count,lane_count,offsets,round_id,racer_id) VALUES (round_gen,racer_count,lane_count,offsets,this_round,(SELECT racer_id FROM racerIds WHERE row_id =i));
+		INSERT INTO heats (round_id) VALUES (this_round);
+		SELECT LAST_INSERT_ID() INTO this_heat;
+		
+		INSERT INTO scores (heat_id,racer_id,lane) VALUES (this_heat,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,0,racer_count)),1);
+		
+#		,this_round,j,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,0,racer_count)),offsets);
+
+		INSERT INTO debug (intgr1,intgr2,intgr3,intgr4,string1)
+		 VALUES (racer_count,this_round,j,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,0,racer_count)),offsets);
 
 		SET j=0;
 		vectors: LOOP
@@ -48,10 +56,10 @@ BEGIN
 			DECLARE v INT;
 			SET j=j+1;
 			SET v = p_extract_offset(offsets,j,lane_count-1);
-#			SET v = SELECT CONVERT(SUBSTR(offsets,j,1),INTEGER);
 
-		INSERT INTO debug (round_gen,racer_count,lane_count,offsets,round_id,racer_id,oCount,vector)
-		 VALUES (round_gen,racer_count,lane_count,offsets,this_round,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,v,racer_count)),j,v);
+			INSERT INTO scores (heat_id,racer_id,lane) VALUES (this_heat,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,v,racer_count)),j+1);
+		INSERT INTO debug (intgr1,intgr2,intgr3,intgr4,intgr5,string1)
+		 VALUES (racer_count,this_round,j,v,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,v,racer_count)),offsets);
 
 			IF j < lane_count-1 THEN
 				ITERATE vectors;
@@ -61,15 +69,13 @@ BEGIN
 		END;
 		END LOOP vectors;
  		
-		IF i < racer_count-1 THEN
+		IF i < racer_count THEN
 			ITERATE lanes;
 		ELSE
 			LEAVE lanes;
 		END IF;
-		
 	END;
 	END LOOP lanes;
 	END;
 
-#	INSERT INTO debug (round_gen,racer_count,lane_count,offsets,round_id,racer_id) VALUES (round_gen,racer_count,lane_count,offsets,this_round,racer_id);
 END
