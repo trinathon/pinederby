@@ -81,7 +81,7 @@ BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS invRacerIds (row_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT) (SELECT r.racer_id FROM racers r WHERE r.derby_id = derby AND r.active = 1 ORDER BY r.last_name DESC);
 #del	SELECT COUNT(*) INTO racer_count FROM racerIds;
 
-	INSERT INTO rounds (derby_id,generator_id) VALUES (derby,0-round_gen);
+	INSERT INTO rounds (derby_id,generator_id) VALUES (derby,round_gen);
 	SELECT LAST_INSERT_ID() INTO this_round;
 	
 	BEGIN

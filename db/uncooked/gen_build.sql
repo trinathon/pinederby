@@ -32,7 +32,7 @@ BEGIN
 						END IF;
 					END IF;
 				END IF;
-				IF (i < rc) THEN
+				IF (i < rc-1) THEN
 					ITERATE segs;
 				ELSE
 					LEAVE segs;

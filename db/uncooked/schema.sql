@@ -15,21 +15,6 @@ CREATE DATABASE IF NOT EXISTS `testderby` /*!40100 DEFAULT CHARACTER SET utf8 CO
 USE `testderby`;
 
 
--- Dumping structure for table testderby.debug
-CREATE TABLE IF NOT EXISTS `debug` (
-  `intgr1` int(11) DEFAULT NULL,
-  `intgr2` int(11) DEFAULT NULL,
-  `intgr3` int(11) DEFAULT NULL,
-  `intgr4` int(11) DEFAULT NULL,
-  `intgr5` int(11) DEFAULT NULL,
-  `string1` varchar(12) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `flot1` float(7,4) DEFAULT NULL,
-  `flot2` float(7,4) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- Data exporting was unselected.
-
-
 -- Dumping structure for table testderby.derbys
 CREATE TABLE IF NOT EXISTS `derbys` (
   `derby_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -93,7 +78,7 @@ BEGIN
 						END IF;
 					END IF;
 				END IF;
-				IF (i < rc) THEN
+				IF (i < rc-1) THEN
 					ITERATE segs;
 				ELSE
 					LEAVE segs;
@@ -138,8 +123,8 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `get_next_generator`(`derby` INT) RET
     COMMENT 'Gets a random available generator'
 BEGIN
 # Get stdev of gen ranks
-	DECLARE next_gen,lane_count,racer_count,range_gap,range_idx,range_full_low,range_full_high,range_mid_low,range_mid_high INT(11);
-	DECLARE rank_avg,rank_stdev FLOAT(7,4);
+	DECLARE next_gen,lane_count,racer_count,range_full_low,range_full_high,range_mid_low,range_mid_high INT(11);
+	DECLARE rank_avg,range_gap,range_idx,rank_stdev FLOAT(7,4);
 
 	SELECT d.number_of_lanes INTO lane_count FROM derbys AS d WHERE d.derby_id=derby;
 	SELECT COUNT(*) INTO racer_count FROM racers AS r WHERE r.derby_id = derby;
@@ -148,14 +133,17 @@ BEGIN
 	 CALL gen_build(derby,'',1,0);
 	END IF;
 	SELECT AVG(g.rank),STD(g.rank) INTO rank_avg,rank_stdev FROM generators AS g WHERE g.number_of_lanes = lane_count AND g.number_of_racers = racer_count;
-	SET range_gap = ROUND(rank_avg-3*rank_stdev);
+# round only on the last step to get the range bounderies
+#	SET range_gap = ROUND(rank_avg-3*rank_stdev);
+	SET range_gap = rank_avg-3*rank_stdev;
 # force range_idx to not repeat twice in a row?	
-	SET range_idx = ROUND(RAND()*rank_stdev);
+#	SET range_idx = ROUND(RAND()*rank_stdev);
+	SET range_idx = RAND()*rank_stdev;
 	
-	SET range_full_low = ROUND(rank_avg-((range_idx-1)*range_gap));
-	SET range_mid_low = ROUND(rank_avg-(range_idx*range_gap));
-	SET range_full_high = ROUND(rank_avg+(range_idx*range_gap));
-	SET range_mid_high = ROUND(rank_avg+((range_idx-1)*range_gap));
+	SET range_full_low = ROUND(rank_avg-ABS((range_idx-1)*range_gap));
+	SET range_mid_low = ROUND(rank_avg-ABS(range_idx*range_gap));
+	SET range_full_high = ROUND(rank_avg+ABS(range_idx*range_gap));
+	SET range_mid_high = ROUND(rank_avg+ABS((range_idx-1)*range_gap));
 
 #	INSERT INTO debug (lane_count,racer_count,range_gap,range_idx,range_full_low,range_full_high,rank_avg,rank_stdev,range_mid_low,range_mid_high) VALUES (lane_count,racer_count,range_gap,range_idx,range_full_low,range_full_high,rank_avg,rank_stdev,range_mid_low,range_mid_high);
 	
@@ -254,7 +242,7 @@ CREATE TABLE IF NOT EXISTS `rounds` (
   `derby_id` int(11) NOT NULL,
   `generator_id` int(11) NOT NULL,
   PRIMARY KEY (`round_id`),
-  UNIQUE KEY `generator_id` (`generator_id`),
+  KEY `generator_id` (`generator_id`),
   CONSTRAINT `rounds_ibfk_2` FOREIGN KEY (`generator_id`) REFERENCES `generators` (`generator_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -268,20 +256,20 @@ BEGIN
 #
 ### Get a generator
 ### Get list of racers
-# loop
-#	assign racers to lanes using generator offsets
-#	insert heat and score objects
-# insert round object
+### insert round object
+### loop
+###	assign racers to lanes using generator offsets
+###	insert heat and score objects
 # repeat for inverted round
 #
-	DECLARE round_gen,lane_count,racer_count,this_round INT;
+	DECLARE round_gen,lane_count,racer_count,this_round,this_heat INT;
 	DECLARE offsets VARCHAR(12);
 	SELECT d.number_of_lanes INTO lane_count FROM derbys AS d WHERE d.derby_id=derby;
 	
 	SET round_gen = get_next_generator(derby);
 	SELECT g.offsets INTO offsets FROM generators AS g WHERE g.generator_id = round_gen;
 	DROP TEMPORARY TABLE IF EXISTS racerIds;
-	CREATE TEMPORARY TABLE IF NOT EXISTS racerIds (row_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT) (SELECT r.racer_id FROM racers r WHERE r.derby_id = derby AND r.active = 1 ORDER BY r.last_name);
+	CREATE TEMPORARY TABLE IF NOT EXISTS racerIds (row_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT) (SELECT r.racer_id,r.last_name FROM racers r WHERE r.derby_id = derby AND r.active = 1 ORDER BY r.last_name ASC);
 	SELECT COUNT(*) INTO racer_count FROM racerIds;
 
 	INSERT INTO rounds (derby_id,generator_id) VALUES (derby,round_gen);
@@ -299,9 +287,13 @@ BEGIN
 #		handle wrap around when offset+lane1 > racer_count
 #	insert heat in heats and heat/lane/racer in scores
 		
-#		SELECT racer_id FROM racerIds WHERE row_id =i;
-		INSERT INTO debug (intgr1,intgr2,intgr3,intgr4,string1)
-		 VALUES (racer_count,this_round,j,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,0,racer_count)),offsets);
+		INSERT INTO heats (round_id) VALUES (this_round);
+		SELECT LAST_INSERT_ID() INTO this_heat;
+		
+		INSERT INTO scores (heat_id,racer_id,lane) VALUES (this_heat,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,0,racer_count)),1);
+		
+#		INSERT INTO debug (intgr1,intgr2,intgr3,intgr4,string1)
+#		 VALUES (racer_count,this_round,j,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,0,racer_count)),offsets);
 
 		SET j=0;
 		vectors: LOOP
@@ -310,8 +302,10 @@ BEGIN
 			SET j=j+1;
 			SET v = p_extract_offset(offsets,j,lane_count-1);
 
-		INSERT INTO debug (intgr1,intgr2,intgr3,intgr4,intgr5,string1)
-		 VALUES (racer_count,this_round,j,v,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,v,racer_count)),offsets);
+			INSERT INTO scores (heat_id,racer_id,lane) VALUES (this_heat,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,v,racer_count)),j+1);
+			
+#		INSERT INTO debug (intgr1,intgr2,intgr3,intgr4,intgr5,string1)
+#		 VALUES (racer_count,this_round,j,v,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,v,racer_count)),offsets);
 
 			IF j < lane_count-1 THEN
 				ITERATE vectors;
@@ -326,7 +320,59 @@ BEGIN
 		ELSE
 			LEAVE lanes;
 		END IF;
+	END;
+	END LOOP lanes;
+	END;
+# inverted
+#ALTER
+	DROP TEMPORARY TABLE IF EXISTS invRacerIds;
+	CREATE TEMPORARY TABLE IF NOT EXISTS invRacerIds (row_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT) (SELECT r.racer_id FROM racers r WHERE r.derby_id = derby AND r.active = 1 ORDER BY r.last_name DESC);
+#del	SELECT COUNT(*) INTO racer_count FROM racerIds;
+
+	INSERT INTO rounds (derby_id,generator_id) VALUES (derby,round_gen);
+	SELECT LAST_INSERT_ID() INTO this_round;
+	
+	BEGIN
+	DECLARE i INT;
+	SET i=0;
+	lanes: LOOP
+	BEGIN
+		DECLARE j INT;
+		SET i = i+1;
 		
+		INSERT INTO heats (round_id) VALUES (this_round);
+		SELECT LAST_INSERT_ID() INTO this_heat;
+		
+		INSERT INTO scores (heat_id,racer_id,lane) VALUES (this_heat,(SELECT racer_id FROM invRacerIds WHERE row_id = p_idx_wrap(i,0,racer_count)),1);
+		
+#		INSERT INTO debug (intgr1,intgr2,intgr3,intgr4,string1)
+#		 VALUES (racer_count,this_round,j,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,0,racer_count)),offsets);
+
+		SET j=0;
+		vectors: LOOP
+		BEGIN
+			DECLARE v INT;
+			SET j=j+1;
+			SET v = p_extract_offset(offsets,j,lane_count-1);
+
+			INSERT INTO scores (heat_id,racer_id,lane) VALUES (this_heat,(SELECT racer_id FROM invRacerIds WHERE row_id = p_idx_wrap(i,v,racer_count)),j+1);
+			
+#		INSERT INTO debug (intgr1,intgr2,intgr3,intgr4,intgr5,string1)
+#		 VALUES (racer_count,this_round,j,v,(SELECT racer_id FROM racerIds WHERE row_id = p_idx_wrap(i,v,racer_count)),offsets);
+
+			IF j < lane_count-1 THEN
+				ITERATE vectors;
+			ELSE
+				LEAVE vectors;
+			END IF;
+		END;
+		END LOOP vectors;
+ 		
+		IF i < racer_count THEN
+			ITERATE lanes;
+		ELSE
+			LEAVE lanes;
+		END IF;
 	END;
 	END LOOP lanes;
 	END;
@@ -341,8 +387,8 @@ CREATE TABLE IF NOT EXISTS `scores` (
   `heat_id` int(11) NOT NULL,
   `racer_id` int(11) NOT NULL,
   `lane` int(11) NOT NULL,
-  `place` int(11) NOT NULL,
-  `last_modified_date` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+  `place` int(11) DEFAULT NULL,
+  `last_modified_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`score_id`),
   KEY `heat_id` (`heat_id`),
   KEY `racer_id` (`racer_id`),
