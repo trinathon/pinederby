@@ -1,4 +1,4 @@
-CREATE DEFINER=`root`@`localhost` PROCEDURE `round_build`(IN `derby` INT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `p_round_build`(IN `derby` INT)
 	LANGUAGE SQL
 	NOT DETERMINISTIC
 	CONTAINS SQL
@@ -18,7 +18,7 @@ BEGIN
 	DECLARE offsets VARCHAR(12);
 	SELECT d.number_of_lanes INTO lane_count FROM derbys AS d WHERE d.derby_id=derby;
 	
-	SET round_gen = get_next_generator(derby);
+	SET round_gen = p_get_next_generator(derby);
 	SELECT g.offsets INTO offsets FROM generators AS g WHERE g.generator_id = round_gen;
 	DROP TEMPORARY TABLE IF EXISTS racerIds;
 	CREATE TEMPORARY TABLE IF NOT EXISTS racerIds (row_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT) (SELECT r.racer_id,r.last_name FROM racers r WHERE r.derby_id = derby AND r.active = 1 ORDER BY r.last_name ASC);

@@ -1,4 +1,4 @@
-CREATE DEFINER=`root`@`localhost` PROCEDURE `gen_build`(IN `derby` INT, IN `offsets` VARCHAR(12), IN `segment` INT, IN `rsum` INT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `p_gen_build`(IN `derby` INT, IN `offsets` VARCHAR(12), IN `segment` INT, IN `rsum` INT)
 	LANGUAGE SQL
 	NOT DETERMINISTIC
 	CONTAINS SQL
@@ -26,7 +26,7 @@ BEGIN
 	#	INSERT INTO debug (intgr1,intgr2,intgr3,intgr4,string1) VALUES (i,rc,rsum+i,dump_flag,offsets);
 	#					LEAVE segs;
 						IF segment < v THEN
-							CALL gen_build(derby,CONCAT(offsets,i,','),segment+1,rsum+i);
+							CALL p_gen_build(derby,CONCAT(offsets,i,','),segment+1,rsum+i);
 						ELSE
 							INSERT INTO generators (number_of_lanes,number_of_racers,offsets,rank) VALUES (lc,rc,CONCAT(offsets,i),rsum+i);
 						END IF;

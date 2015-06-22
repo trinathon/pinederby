@@ -1,4 +1,4 @@
-CREATE DEFINER=`root`@`localhost` FUNCTION `get_next_generator`(`derby` INT)
+CREATE DEFINER=`root`@`localhost` FUNCTION `p_get_next_generator`(`derby` INT)
 	RETURNS int(11)
 	LANGUAGE SQL
 	NOT DETERMINISTIC
@@ -14,7 +14,7 @@ BEGIN
 	SELECT COUNT(*) INTO racer_count FROM racers AS r WHERE r.derby_id = derby;
 	
 	IF NOT (SELECT COUNT(*) FROM generators AS g WHERE g.number_of_lanes = lane_count AND g.number_of_racers = racer_count) THEN
-	 CALL gen_build(derby,'',1,0);
+	 CALL p_gen_build(derby,'',1,0);
 	END IF;
 	SELECT AVG(g.rank),STD(g.rank) INTO rank_avg,rank_stdev FROM generators AS g WHERE g.number_of_lanes = lane_count AND g.number_of_racers = racer_count;
 # round only on the last step to get the range bounderies

@@ -18,8 +18,8 @@
 SELECT * FROM generators WHERE generator_id = 2157;
 -- SELECT p_idx_wrap(16,0,16),p_idx_wrap(16,15,16),p_idx_wrap(16,16,16),p_idx_wrap(16,13,16);
 
-#CALL round_build(2);
-#CALL gen_build(2,'',1,0);
+#CALL p_round_build(2);
+#CALL p_gen_build(2,'',1,0);
 
 #SELECT get_next_generator(derby) INTO g_id,g_offsets;
 #SELECT COUNT(*) FROM generators AS g WHERE g.number_of_lanes = 4 AND g.number_of_racers = 16;  # 3360 -> 1288

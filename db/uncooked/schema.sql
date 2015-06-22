@@ -47,118 +47,6 @@ CREATE TABLE IF NOT EXISTS `generators` (
 -- Data exporting was unselected.
 
 
--- Dumping structure for procedure testderby.gen_build
-DELIMITER //
-CREATE DEFINER=`root`@`localhost` PROCEDURE `gen_build`(IN `derby` INT, IN `offsets` VARCHAR(12), IN `segment` INT, IN `rsum` INT)
-BEGIN
-#
-# Sample call; CALL gen_build(2,'',1,0);
-#
-	DECLARE i,v,rc,lc INT;
-	SET @@GLOBAL.max_sp_recursion_depth = 255;
-	SET @@session.max_sp_recursion_depth = 255;
-	SELECT d.number_of_lanes INTO lc FROM derbys AS d WHERE d.derby_id = derby;
-	SELECT COUNT(*) INTO rc FROM racers AS r WHERE r.derby_id = derby;
-	SET v=lc-1;
-#	IF segment < v THEN
-		BEGIN
-#			DECLARE i INT;
-			SET i=0;
-			segs: LOOP
-			cseg: BEGIN
-				SET i = i+1;
-				IF NOT FIND_IN_SET(i,offsets) THEN
-					IF (((rsum+i) % rc) != 0) THEN
-	#	INSERT INTO debug (intgr1,intgr2,intgr3,intgr4,string1) VALUES (i,rc,rsum+i,dump_flag,offsets);
-	#					LEAVE segs;
-						IF segment < v THEN
-							CALL gen_build(derby,CONCAT(offsets,i,','),segment+1,rsum+i);
-						ELSE
-							INSERT INTO generators (number_of_lanes,number_of_racers,offsets,rank) VALUES (lc,rc,CONCAT(offsets,i),rsum+i);
-						END IF;
-					END IF;
-				END IF;
-				IF (i < rc-1) THEN
-					ITERATE segs;
-				ELSE
-					LEAVE segs;
-				END IF;
-			END cseg;
-			END LOOP segs;
-		END;
-/*
-	ELSE
-		BEGIN
-			DECLARE j INT;
-			SET j=0;
-			segend: LOOP
-			sgend: BEGIN
-				IF dump_flag THEN
-					SET dump_flag = 0;
-					LEAVE segend;
-				END IF;
-				SET j = j+1;
-				IF NOT FIND_IN_SET(j,offsets) THEN
-					IF (((rsum+j) % rc) != 0) THEN
-						INSERT INTO generators (number_of_lanes,number_of_racers,offsets,rank) VALUES (lc,rc,CONCAT(offsets,j),rsum+j);
-					END IF;
-				END IF;
-				IF j < rc THEN
-					ITERATE segend;
-				ELSE
-					LEAVE segend;
-				END IF;
-			END sgend;
-			END LOOP segend;
-		END;
-	END IF;
-*/
-END//
-DELIMITER ;
-
-
--- Dumping structure for function testderby.get_next_generator
-DELIMITER //
-CREATE DEFINER=`root`@`localhost` FUNCTION `get_next_generator`(`derby` INT) RETURNS int(11)
-    COMMENT 'Gets a random available generator'
-BEGIN
-# Get stdev of gen ranks
-	DECLARE next_gen,lane_count,racer_count,range_full_low,range_full_high,range_mid_low,range_mid_high INT(11);
-	DECLARE rank_avg,range_gap,range_idx,rank_stdev FLOAT(7,4);
-
-	SELECT d.number_of_lanes INTO lane_count FROM derbys AS d WHERE d.derby_id=derby;
-	SELECT COUNT(*) INTO racer_count FROM racers AS r WHERE r.derby_id = derby;
-	
-	IF NOT (SELECT COUNT(*) FROM generators AS g WHERE g.number_of_lanes = lane_count AND g.number_of_racers = racer_count) THEN
-	 CALL gen_build(derby,'',1,0);
-	END IF;
-	SELECT AVG(g.rank),STD(g.rank) INTO rank_avg,rank_stdev FROM generators AS g WHERE g.number_of_lanes = lane_count AND g.number_of_racers = racer_count;
-# round only on the last step to get the range bounderies
-#	SET range_gap = ROUND(rank_avg-3*rank_stdev);
-	SET range_gap = rank_avg-3*rank_stdev;
-# force range_idx to not repeat twice in a row?	
-#	SET range_idx = ROUND(RAND()*rank_stdev);
-	SET range_idx = RAND()*rank_stdev;
-	
-	SET range_full_low = ROUND(rank_avg-ABS((range_idx-1)*range_gap));
-	SET range_mid_low = ROUND(rank_avg-ABS(range_idx*range_gap));
-	SET range_full_high = ROUND(rank_avg+ABS(range_idx*range_gap));
-	SET range_mid_high = ROUND(rank_avg+ABS((range_idx-1)*range_gap));
-
-#	INSERT INTO debug (lane_count,racer_count,range_gap,range_idx,range_full_low,range_full_high,rank_avg,rank_stdev,range_mid_low,range_mid_high) VALUES (lane_count,racer_count,range_gap,range_idx,range_full_low,range_full_high,rank_avg,rank_stdev,range_mid_low,range_mid_high);
-	
-	SELECT g.generator_id INTO next_gen FROM generators AS g
-	 WHERE (g.number_of_lanes = lane_count AND g.number_of_racers = racer_count)
-	  AND ((range_full_low < g.rank AND range_mid_low > g.rank) OR (range_mid_high < g.rank AND range_full_high > g.rank))
-	  AND g.generator_id NOT IN
-	   (SELECT r.generator_id FROM rounds AS r WHERE r.derby_id = derby) 
-	ORDER BY RAND() LIMIT 1;
-
-	RETURN next_gen;
-END//
-DELIMITER ;
-
-
 -- Dumping structure for table testderby.heats
 CREATE TABLE IF NOT EXISTS `heats` (
   `heat_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -211,6 +99,118 @@ END//
 DELIMITER ;
 
 
+-- Dumping structure for procedure testderby.p_gen_build
+DELIMITER //
+CREATE DEFINER=`root`@`localhost` PROCEDURE `p_gen_build`(IN `derby` INT, IN `offsets` VARCHAR(12), IN `segment` INT, IN `rsum` INT)
+BEGIN
+#
+# Sample call; CALL gen_build(2,'',1,0);
+#
+	DECLARE i,v,rc,lc INT;
+	SET @@GLOBAL.max_sp_recursion_depth = 255;
+	SET @@session.max_sp_recursion_depth = 255;
+	SELECT d.number_of_lanes INTO lc FROM derbys AS d WHERE d.derby_id = derby;
+	SELECT COUNT(*) INTO rc FROM racers AS r WHERE r.derby_id = derby;
+	SET v=lc-1;
+#	IF segment < v THEN
+		BEGIN
+#			DECLARE i INT;
+			SET i=0;
+			segs: LOOP
+			cseg: BEGIN
+				SET i = i+1;
+				IF NOT FIND_IN_SET(i,offsets) THEN
+					IF (((rsum+i) % rc) != 0) THEN
+	#	INSERT INTO debug (intgr1,intgr2,intgr3,intgr4,string1) VALUES (i,rc,rsum+i,dump_flag,offsets);
+	#					LEAVE segs;
+						IF segment < v THEN
+							CALL p_gen_build(derby,CONCAT(offsets,i,','),segment+1,rsum+i);
+						ELSE
+							INSERT INTO generators (number_of_lanes,number_of_racers,offsets,rank) VALUES (lc,rc,CONCAT(offsets,i),rsum+i);
+						END IF;
+					END IF;
+				END IF;
+				IF (i < rc-1) THEN
+					ITERATE segs;
+				ELSE
+					LEAVE segs;
+				END IF;
+			END cseg;
+			END LOOP segs;
+		END;
+/*
+	ELSE
+		BEGIN
+			DECLARE j INT;
+			SET j=0;
+			segend: LOOP
+			sgend: BEGIN
+				IF dump_flag THEN
+					SET dump_flag = 0;
+					LEAVE segend;
+				END IF;
+				SET j = j+1;
+				IF NOT FIND_IN_SET(j,offsets) THEN
+					IF (((rsum+j) % rc) != 0) THEN
+						INSERT INTO generators (number_of_lanes,number_of_racers,offsets,rank) VALUES (lc,rc,CONCAT(offsets,j),rsum+j);
+					END IF;
+				END IF;
+				IF j < rc THEN
+					ITERATE segend;
+				ELSE
+					LEAVE segend;
+				END IF;
+			END sgend;
+			END LOOP segend;
+		END;
+	END IF;
+*/
+END//
+DELIMITER ;
+
+
+-- Dumping structure for function testderby.p_get_next_generator
+DELIMITER //
+CREATE DEFINER=`root`@`localhost` FUNCTION `p_get_next_generator`(`derby` INT) RETURNS int(11)
+    COMMENT 'Gets a random available generator'
+BEGIN
+# Get stdev of gen ranks
+	DECLARE next_gen,lane_count,racer_count,range_full_low,range_full_high,range_mid_low,range_mid_high INT(11);
+	DECLARE rank_avg,range_gap,range_idx,rank_stdev FLOAT(7,4);
+
+	SELECT d.number_of_lanes INTO lane_count FROM derbys AS d WHERE d.derby_id=derby;
+	SELECT COUNT(*) INTO racer_count FROM racers AS r WHERE r.derby_id = derby;
+	
+	IF NOT (SELECT COUNT(*) FROM generators AS g WHERE g.number_of_lanes = lane_count AND g.number_of_racers = racer_count) THEN
+	 CALL p_gen_build(derby,'',1,0);
+	END IF;
+	SELECT AVG(g.rank),STD(g.rank) INTO rank_avg,rank_stdev FROM generators AS g WHERE g.number_of_lanes = lane_count AND g.number_of_racers = racer_count;
+# round only on the last step to get the range bounderies
+#	SET range_gap = ROUND(rank_avg-3*rank_stdev);
+	SET range_gap = rank_avg-3*rank_stdev;
+# force range_idx to not repeat twice in a row?	
+#	SET range_idx = ROUND(RAND()*rank_stdev);
+	SET range_idx = RAND()*rank_stdev;
+	
+	SET range_full_low = ROUND(rank_avg-ABS((range_idx-1)*range_gap));
+	SET range_mid_low = ROUND(rank_avg-ABS(range_idx*range_gap));
+	SET range_full_high = ROUND(rank_avg+ABS(range_idx*range_gap));
+	SET range_mid_high = ROUND(rank_avg+ABS((range_idx-1)*range_gap));
+
+#	INSERT INTO debug (lane_count,racer_count,range_gap,range_idx,range_full_low,range_full_high,rank_avg,rank_stdev,range_mid_low,range_mid_high) VALUES (lane_count,racer_count,range_gap,range_idx,range_full_low,range_full_high,rank_avg,rank_stdev,range_mid_low,range_mid_high);
+	
+	SELECT g.generator_id INTO next_gen FROM generators AS g
+	 WHERE (g.number_of_lanes = lane_count AND g.number_of_racers = racer_count)
+	  AND ((range_full_low < g.rank AND range_mid_low > g.rank) OR (range_mid_high < g.rank AND range_full_high > g.rank))
+	  AND g.generator_id NOT IN
+	   (SELECT r.generator_id FROM rounds AS r WHERE r.derby_id = derby) 
+	ORDER BY RAND() LIMIT 1;
+
+	RETURN next_gen;
+END//
+DELIMITER ;
+
+
 -- Dumping structure for function testderby.p_idx_wrap
 DELIMITER //
 CREATE DEFINER=`root`@`localhost` FUNCTION `p_idx_wrap`(`idx` INT, `off_set` INT, `max_idx` INT) RETURNS int(11)
@@ -220,38 +220,9 @@ END//
 DELIMITER ;
 
 
--- Dumping structure for table testderby.racers
-CREATE TABLE IF NOT EXISTS `racers` (
-  `racer_id` int(11) NOT NULL AUTO_INCREMENT,
-  `derby_id` int(11) NOT NULL,
-  `first_name` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
-  `last_name` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
-  `active` tinyint(1) NOT NULL,
-  `car_photo` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `racer_photo` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `last_modified_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`racer_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- Data exporting was unselected.
-
-
--- Dumping structure for table testderby.rounds
-CREATE TABLE IF NOT EXISTS `rounds` (
-  `round_id` int(11) NOT NULL AUTO_INCREMENT,
-  `derby_id` int(11) NOT NULL,
-  `generator_id` int(11) NOT NULL,
-  PRIMARY KEY (`round_id`),
-  KEY `generator_id` (`generator_id`),
-  CONSTRAINT `rounds_ibfk_2` FOREIGN KEY (`generator_id`) REFERENCES `generators` (`generator_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- Data exporting was unselected.
-
-
--- Dumping structure for procedure testderby.round_build
+-- Dumping structure for procedure testderby.p_round_build
 DELIMITER //
-CREATE DEFINER=`root`@`localhost` PROCEDURE `round_build`(IN `derby` INT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `p_round_build`(IN `derby` INT)
 BEGIN
 #
 ### Get a generator
@@ -266,7 +237,7 @@ BEGIN
 	DECLARE offsets VARCHAR(12);
 	SELECT d.number_of_lanes INTO lane_count FROM derbys AS d WHERE d.derby_id=derby;
 	
-	SET round_gen = get_next_generator(derby);
+	SET round_gen = p_get_next_generator(derby);
 	SELECT g.offsets INTO offsets FROM generators AS g WHERE g.generator_id = round_gen;
 	DROP TEMPORARY TABLE IF EXISTS racerIds;
 	CREATE TEMPORARY TABLE IF NOT EXISTS racerIds (row_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT) (SELECT r.racer_id,r.last_name FROM racers r WHERE r.derby_id = derby AND r.active = 1 ORDER BY r.last_name ASC);
@@ -379,6 +350,35 @@ BEGIN
 
 END//
 DELIMITER ;
+
+
+-- Dumping structure for table testderby.racers
+CREATE TABLE IF NOT EXISTS `racers` (
+  `racer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `derby_id` int(11) NOT NULL,
+  `first_name` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
+  `last_name` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  `car_photo` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `racer_photo` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `last_modified_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`racer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- Data exporting was unselected.
+
+
+-- Dumping structure for table testderby.rounds
+CREATE TABLE IF NOT EXISTS `rounds` (
+  `round_id` int(11) NOT NULL AUTO_INCREMENT,
+  `derby_id` int(11) NOT NULL,
+  `generator_id` int(11) NOT NULL,
+  PRIMARY KEY (`round_id`),
+  KEY `generator_id` (`generator_id`),
+  CONSTRAINT `rounds_ibfk_2` FOREIGN KEY (`generator_id`) REFERENCES `generators` (`generator_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- Data exporting was unselected.
 
 
 -- Dumping structure for table testderby.scores
