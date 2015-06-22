@@ -9,13 +9,13 @@
 -- JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE rnd.derby_id = 2;
 -- 
 -- SELECT SUM(sc.place) FROM scores AS sc WHERE sc.racer_id = 12;
--- SELECT rcr.first_name,rcr.last_name,SUM(sc.place) FROM racers AS rcr
--- JOIN scores AS sc ON sc.racer_id = rcr.racer_id
--- JOIN heats AS ht ON ht.heat_id = sc.heat_id
--- JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE rnd.derby_id = 2;
--- 
---
-SELECT * FROM generators WHERE generator_id = 2157;
+SELECT rnd.round_id,ht.heat_id,sc.lane,rcr.first_name,rcr.last_name,sc.place FROM racers AS rcr
+	JOIN scores AS sc ON sc.racer_id = rcr.racer_id
+		JOIN heats AS ht ON ht.heat_id = sc.heat_id
+			JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE sc.lane=1 AND rnd.round_id=1 AND rnd.derby_id = 2;
+
+CALL p_test();
+#SELECT * FROM generators WHERE generator_id = 2157;
 -- SELECT p_idx_wrap(16,0,16),p_idx_wrap(16,15,16),p_idx_wrap(16,16,16),p_idx_wrap(16,13,16);
 
 #CALL p_round_build(2);

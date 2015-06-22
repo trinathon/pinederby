@@ -24,16 +24,16 @@ BEGIN
 #	SET range_idx = ROUND(RAND()*rank_stdev);
 	SET range_idx = RAND()*rank_stdev;
 	
-	SET range_full_low = ROUND(rank_avg-ABS((range_idx-1)*range_gap));
-	SET range_mid_low = ROUND(rank_avg-ABS(range_idx*range_gap));
+	SET range_full_low = ROUND(rank_avg-ABS(range_idx*range_gap));
+	SET range_mid_low = ROUND(rank_avg-ABS((range_idx-1)*range_gap));
 	SET range_full_high = ROUND(rank_avg+ABS(range_idx*range_gap));
 	SET range_mid_high = ROUND(rank_avg+ABS((range_idx-1)*range_gap));
 
-#	INSERT INTO debug (lane_count,racer_count,range_gap,range_idx,range_full_low,range_full_high,rank_avg,rank_stdev,range_mid_low,range_mid_high) VALUES (lane_count,racer_count,range_gap,range_idx,range_full_low,range_full_high,rank_avg,rank_stdev,range_mid_low,range_mid_high);
+	INSERT INTO debug (flot1,intgr1,intgr2,intgr3,intgr4) VALUES (range_idx,range_full_low,range_mid_low,range_mid_high,range_full_high);
 	
 	SELECT g.generator_id INTO next_gen FROM generators AS g
 	 WHERE (g.number_of_lanes = lane_count AND g.number_of_racers = racer_count)
-	  AND ((range_full_low < g.rank AND range_mid_low > g.rank) OR (range_mid_high < g.rank AND range_full_high > g.rank))
+	  AND ((range_full_low <= g.rank AND range_mid_low >= g.rank) OR (range_mid_high <= g.rank AND range_full_high >= g.rank))
 	  AND g.generator_id NOT IN
 	   (SELECT r.generator_id FROM rounds AS r WHERE r.derby_id = derby) 
 	ORDER BY RAND() LIMIT 1;
