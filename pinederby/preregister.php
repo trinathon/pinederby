@@ -29,6 +29,7 @@
         		header('Location: ../index.php?error=2');
 			} else {
 				// Found the derby, store the derby ID
+				$derby_id=$derby['derby_id'];
 				$derby['success'] = true;
 			}
 		}
@@ -143,8 +144,7 @@
 			<img class="img-responsive" src="images/car-logo.png" alt="LOGO GOES HERE">
 		</div>
 		<div id="formContainer" class="col-6-md">
-			
-			<form id="userInfo" class="form-signin" role="form" action="post/post_preregister_racer.php" method="post" name="login_form">
+			<form id="userInfo" class="form-signin" role="form" enctype="multipart/form-data" action="post/post_preregister_racer.php" method="post" name="login_form">
 				<h2 class="form-signin-heading">Please fill in info</h2>
 				<label for="first_name" class="sr-only">First Name</label>
 				<input type="text" id="first_name" name="first_name" class="form-control" placeholder="First Name" required="true" autofocus="true">
@@ -162,6 +162,7 @@
 						<img id="carPhotoPreview" src="" width="100px">
 					</div>
 				</div>
+				<input type="hidden" name="derby_id" value="<?php echo $derby_id;?>">
 				<button class="btn btn-lg btn-primary" type="submit" onclick="">Submit</button>
 			</form>
 		</div><!--./formContainer-->
