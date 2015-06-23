@@ -22,6 +22,11 @@
 		$number_of_lanes = $derby['number_of_lanes'];
 		echo "<strong>Number of Lanes: ".$number_of_lanes."</strong>\n";
 	}
+
+/*	The rest of this is now handled in MySQL.
+		All that is needed is a call to the stored procedure of p_round_build.
+
+
 	// Get the racers
 	$racers = array();
 	$query = "	SELECT *
@@ -86,32 +91,6 @@
 	}
 	$number_of_generators = sizeof($generators);
 
-
-	// Get unused generators with same number of Lanes
-	//
-	// Check inner select for limiting the rounds query to the current derby
-	//
-	echo "Stored Proc call</br>";
-
-	$generator = 0;
-//	$query = " CALL get_next_generator(1,3); ";
-	$query = " SELECT get_next_generator(1,3); ";
-	if ($result = $mysqli->query($query)) {
-//		while($obj = $result->fetch_object()){
-//			$generator = $result->current_field();	
-//		}
-		echo "<pre>";
-		var_dump($result);
-		var_dump($generator);
-		echo "</pre>";
-		echo "<strong>Generator Id: ".$generator."</strong>";
-		$result->close();
-	}
-	error_log("Oracle database not available!", 0);
-	phpinfo();
-	echo "</br>END Stored Proc call</br>";
-
-
 	// Select a random generator that hasn't already been used
 	echo "RANDOM</br>";
 	$rnd_gens = range(1, $number_of_generators); 
@@ -134,5 +113,5 @@
 	$offsets = explode(',', $round_gen['offsets']);
 	echo "</br><strong>Offsets</strong></br>";
 	var_dump($offsets);
-
+*/
 ?>
