@@ -1,27 +1,35 @@
 <?php
-	require_once('../includes/db_connect.php');
+//	require_once('../includes/db_connect.php');
+	require_once('../includes/db_query.php');
 	// Setup fake post variables
 	// todo: finish with real variables
 	$derby_id = 1;
-
+/*
 	// Get the derby Data
-	$query = "	SELECT `derby_id`, `name`, `number_of_lanes`,`status`,`creation_date`
+	$rquery = "	SELECT `derby_id`, `name`, `number_of_lanes`,`status`,`creation_date`
 					FROM `derbys`
 					WHERE `derby_id`='".$derby_id."'";
 	$derby = array();
-	if ($result = $mysqli->query($query)) {
+	if ($result = $mysqli->query($rquery)) {
 		while($obj = $result->fetch_object()){
 			$derby = $obj;
 		}
 		$result->close();
 
 		$derby =  (array) $derby;
-		/*echo "<pre>";
+		/-*echo "<pre>";
 		var_dump($derby);
-		echo "</pre>";*/
+		echo "</pre>";*-/
 		$number_of_lanes = $derby['number_of_lanes'];
 		echo "<strong>Number of Lanes: ".$number_of_lanes."</strong>\n";
 	}
+*/
+	$rquery = "	SELECT `derby_id`, `name`, `number_of_lanes`,`status`,`creation_date`
+					FROM `derbys`
+					WHERE `derby_id`='".$derby_id."'";
+	$qtest = qsql($rquery);
+//	var_dump($qtest);
+
 
 /*	The rest of this is now handled in MySQL.
 		All that is needed is a call to the stored procedure of p_round_build.
