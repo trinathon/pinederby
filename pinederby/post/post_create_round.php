@@ -1,27 +1,49 @@
 <?php
-	require_once('../includes/db_connect.php');
+//	require_once('../includes/db_connect.php');
+	require_once('../includes/db_query.php');
 	// Setup fake post variables
 	// todo: finish with real variables
 	$derby_id = 1;
-
+/*
 	// Get the derby Data
-	$query = "	SELECT `derby_id`, `name`, `number_of_lanes`,`status`,`creation_date`
+	$rquery = "	SELECT `derby_id`, `name`, `number_of_lanes`,`status`,`creation_date`
 					FROM `derbys`
 					WHERE `derby_id`='".$derby_id."'";
 	$derby = array();
-	if ($result = $mysqli->query($query)) {
+	if ($result = $mysqli->query($rquery)) {
 		while($obj = $result->fetch_object()){
 			$derby = $obj;
 		}
 		$result->close();
 
 		$derby =  (array) $derby;
-		/*echo "<pre>";
+		/-*echo "<pre>";
 		var_dump($derby);
-		echo "</pre>";*/
+		echo "</pre>";*-/
 		$number_of_lanes = $derby['number_of_lanes'];
 		echo "<strong>Number of Lanes: ".$number_of_lanes."</strong>\n";
 	}
+*/
+	$rquery = "	SELECT `derby_id`, `name`, `number_of_lanes`,`status`,`creation_date`
+					FROM `derbys`
+					WHERE `derby_id`='".$derby_id."'";
+	$qtest = qsql($rquery);
+	echo "<pre>";
+	echo "$qtest\n";
+	echo "</pre>";
+
+	$derby_id = 2;
+	$rquery = "	SELECT rnd.round_id,ht.heat_id,sc.lane,rcr.first_name,rcr.last_name,sc.place FROM racers AS rcr
+					JOIN scores AS sc ON sc.racer_id = rcr.racer_id
+						JOIN heats AS ht ON ht.heat_id = sc.heat_id
+							JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE sc.lane=1 AND rnd.round_id=1 AND rnd.derby_id = '".$derby_id."'";
+
+//					WHERE `derby_id`='".$derby_id."'";
+	$qtest = qsql($rquery);
+	echo "<pre>";
+	echo "$qtest\n";
+	echo "</pre>";
+//	var_dump($qtest);
 
 /*	The rest of this is now handled in MySQL.
 		All that is needed is a call to the stored procedure of p_round_build.
