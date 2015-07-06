@@ -33,13 +33,16 @@
 	echo "</pre>";
 
 	$derby_id = 2;
-	$rquery = "	SELECT rnd.round_id,ht.heat_id,sc.lane,rcr.first_name,rcr.last_name,sc.place FROM racers AS rcr
+//	$rquery = "	SELECT rnd.round_id,ht.heat_id,sc.lane,rcr.first_name,rcr.last_name,sc.place FROM racers AS rcr
+//					JOIN scores AS sc ON sc.racer_id = rcr.racer_id
+//						JOIN heats AS ht ON ht.heat_id = sc.heat_id
+//							JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE sc.lane=1 AND rnd.round_id=1 AND rnd.derby_id = '".$derby_id."'";
+//
+//					WHERE `derby_id`='".$derby_id."'";
+	$qtest = qsql("	SELECT rnd.round_id,ht.heat_id,sc.lane,rcr.first_name,rcr.last_name,sc.place FROM racers AS rcr
 					JOIN scores AS sc ON sc.racer_id = rcr.racer_id
 						JOIN heats AS ht ON ht.heat_id = sc.heat_id
-							JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE sc.lane=1 AND rnd.round_id=1 AND rnd.derby_id = '".$derby_id."'";
-
-//					WHERE `derby_id`='".$derby_id."'";
-	$qtest = qsql($rquery);
+							JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE sc.lane=1 AND rnd.round_id=1 AND rnd.derby_id = '".$derby_id."'");
 	echo "<pre>";
 	echo "$qtest\n";
 	echo "</pre>";

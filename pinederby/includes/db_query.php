@@ -14,30 +14,4 @@
 		}
 	}
 
-/*
-	$query = $_POST['query'];
-	$resultset = array();
-	if ($result = $mysqli->query($query)) {
-		while($obj = $result->fetch_object()){
-			$derby = $obj;
-		}
-		$result->close();
-
-		$resultset =  (array) $resultset;
-		/-*echo "<pre>";
-		var_dump($derby);
-		echo "</pre>";*-/
-		$number_of_lanes = $derby['number_of_lanes'];
-		echo "<strong>Number of Lanes: ".$number_of_lanes."</strong>\n";
-	}
-*/
-/*
-	$sth = mysqli_query("SELECT ...");
-	$rows = array();
-	while($r = mysqli_fetch_assoc($sth)) {
-	    $rows[] = $r;
-	}
-	print json_encode($rows);
-*/
-
 ?>
