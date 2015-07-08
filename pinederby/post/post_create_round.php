@@ -4,6 +4,9 @@
 	// Setup fake post variables
 	// todo: finish with real variables
 	$derby_id = 1;
+	$qOne = "	SELECT `derby_id`, `name`, `number_of_lanes`,`status`,`creation_date`
+					FROM `derbys`
+					WHERE `derby_id`='".$derby_id."'";
 /*
 	// Get the derby Data
 	$rquery = "	SELECT `derby_id`, `name`, `number_of_lanes`,`status`,`creation_date`
@@ -24,25 +27,18 @@
 		echo "<strong>Number of Lanes: ".$number_of_lanes."</strong>\n";
 	}
 */
-	$rquery = "	SELECT `derby_id`, `name`, `number_of_lanes`,`status`,`creation_date`
-					FROM `derbys`
-					WHERE `derby_id`='".$derby_id."'";
+	$rquery = $qOne;
 	$qtest = qsql($rquery);
 	echo "<pre>";
 	echo "$qtest\n";
 	echo "</pre>";
 
 	$derby_id = 2;
-//	$rquery = "	SELECT rnd.round_id,ht.heat_id,sc.lane,rcr.first_name,rcr.last_name,sc.place FROM racers AS rcr
-//					JOIN scores AS sc ON sc.racer_id = rcr.racer_id
-//						JOIN heats AS ht ON ht.heat_id = sc.heat_id
-//							JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE sc.lane=1 AND rnd.round_id=1 AND rnd.derby_id = '".$derby_id."'";
-//
-//					WHERE `derby_id`='".$derby_id."'";
-	$qtest = qsql("	SELECT rnd.round_id,ht.heat_id,sc.lane,rcr.first_name,rcr.last_name,sc.place FROM racers AS rcr
+	$qTwo = "	SELECT rnd.round_id,ht.heat_id,sc.lane,rcr.first_name,rcr.last_name,sc.place FROM racers AS rcr
 					JOIN scores AS sc ON sc.racer_id = rcr.racer_id
 						JOIN heats AS ht ON ht.heat_id = sc.heat_id
-							JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE sc.lane=1 AND rnd.round_id=1 AND rnd.derby_id = '".$derby_id."'");
+							JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE sc.lane=1 AND rnd.round_id=1 AND rnd.derby_id = '".$derby_id."'";
+	$qtest = qsql($qTwo);
 	echo "<pre>";
 	echo "$qtest\n";
 	echo "</pre>";

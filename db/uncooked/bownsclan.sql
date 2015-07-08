@@ -14,7 +14,7 @@ SELECT rnd.round_id,ht.heat_id,sc.lane,rcr.first_name,rcr.last_name,sc.place FRO
 		JOIN heats AS ht ON ht.heat_id = sc.heat_id
 			JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE sc.lane=1 AND rnd.round_id=1 AND rnd.derby_id = 2;
 
-CALL p_test();
+#CALL p_test();
 #SELECT * FROM generators WHERE generator_id = 2157;
 -- SELECT p_idx_wrap(16,0,16),p_idx_wrap(16,15,16),p_idx_wrap(16,16,16),p_idx_wrap(16,13,16);
 
