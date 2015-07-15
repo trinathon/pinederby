@@ -42,6 +42,18 @@
 	echo "<pre>";
 	echo "$qtest\n";
 	echo "</pre>";
+
+	$qtest = qsql("call something");
+	echo "<pre>";
+	echo "call\n";
+	var_dump($qtest);
+	echo "</pre>";
+	$qtest = qsql("select something");
+	echo "<pre>";
+	echo "select\n";
+	var_dump($qtest);
+	echo "</pre>";
+
 //	var_dump($qtest);
 
 /*	The rest of this is now handled in MySQL.
