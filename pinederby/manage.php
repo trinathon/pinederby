@@ -49,14 +49,10 @@
 			//		add the derbys to the list with links to load them
 			console.log("refresh");
 			refreshDerbyList();
-
 		}
 		function closeDerby(){
 			//todo: function to close the open derby
 			console.log("Close Derby"); //todo: remove debug
-
-
-
 		}
 		function createDerby(){
 			//todo: function to create a derby
@@ -77,7 +73,6 @@
 					}
 				}
 			});
-
 		}
 		function loadDerby(derbyId){
 			// Hide the modal if the derby was just created
@@ -118,8 +113,7 @@
 			$('#main').show();
 			$('#navDerbySelect').hide();
 			$('#navDerbyName').show();
-
-		}
+		}//.loadDerby
 		function refreshDerbyList(){
 			//var userId = "<?php echo $_SESSION['user_id'];?>";
 			var userId = "2";
@@ -137,7 +131,6 @@
 				    $('#notify').html('<span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span> Derby List');
 				}
 			});
-
 		}
 		function getDerbys(userId){
 			var dynamicData = {};
@@ -158,7 +151,19 @@
 				data: dynamicData,
 				dataType: 'json'
 			});
-
+		}
+		function loadRacers(derbyId){
+			$.ajax({
+				type: "POST",
+				url: 'post/get_racers.php',
+				data: {
+					derby_id: derbyId
+				},
+				dataType: 'json',
+				success: function( response ) {
+					console.log( response );
+				}
+			});	
 		}
 	</script>
 </head>

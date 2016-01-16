@@ -1,53 +1,24 @@
 <?php
-//	require_once('../includes/db_connect.php');
 	require_once('../includes/db_query.php');
 	// Setup fake post variables
 	// todo: finish with real variables
-	$derby_id = 1;
-	$qOne = "	SELECT `derby_id`, `name`, `number_of_lanes`,`status`,`creation_date`
-					FROM `derbys`
-					WHERE `derby_id`='".$derby_id."'";
-/*
-	// Get the derby Data
-	$rquery = "	SELECT `derby_id`, `name`, `number_of_lanes`,`status`,`creation_date`
-					FROM `derbys`
-					WHERE `derby_id`='".$derby_id."'";
-	$derby = array();
-	if ($result = $mysqli->query($rquery)) {
-		while($obj = $result->fetch_object()){
-			$derby = $obj;
-		}
-		$result->close();
+	
+	// $derby_id = 2;
+	// $qTwo = "	SELECT rnd.round_id,ht.heat_id,sc.lane,rcr.first_name,rcr.last_name,sc.place FROM racers AS rcr
+	// 				JOIN scores AS sc ON sc.racer_id = rcr.racer_id
+	// 					JOIN heats AS ht ON ht.heat_id = sc.heat_id
+	// 						JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE sc.lane=1 AND rnd.round_id=1 AND rnd.derby_id = '".$derby_id."'";
+	// $qtest = qsql($qTwo);
+	// echo "<pre>";
+	// echo "$qtest\n";
+	// echo "</pre>";
 
-		$derby =  (array) $derby;
-		/-*echo "<pre>";
-		var_dump($derby);
-		echo "</pre>";*-/
-		$number_of_lanes = $derby['number_of_lanes'];
-		echo "<strong>Number of Lanes: ".$number_of_lanes."</strong>\n";
-	}
-*/
-	$rquery = $qOne;
-	$qtest = qsql($rquery);
-	echo "<pre>";
-	echo "$qtest\n";
-	echo "</pre>";
-
-	$derby_id = 2;
-	$qTwo = "	SELECT rnd.round_id,ht.heat_id,sc.lane,rcr.first_name,rcr.last_name,sc.place FROM racers AS rcr
-					JOIN scores AS sc ON sc.racer_id = rcr.racer_id
-						JOIN heats AS ht ON ht.heat_id = sc.heat_id
-							JOIN rounds AS rnd ON ht.round_id = rnd.round_id WHERE sc.lane=1 AND rnd.round_id=1 AND rnd.derby_id = '".$derby_id."'";
-	$qtest = qsql($qTwo);
-	echo "<pre>";
-	echo "$qtest\n";
-	echo "</pre>";
-
-	$qtest = qsql("call something");
-	echo "<pre>";
-	echo "call\n";
-	var_dump($qtest);
-	echo "</pre>";
+	$qtest = qsql("call p_round_build(2)");
+	// echo "<pre>";
+	// echo "call\n";
+	// var_dump($qtest);
+	// echo "</pre>";
+	
 	$qtest = qsql("select something");
 	echo "<pre>";
 	echo "select\n";

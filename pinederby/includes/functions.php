@@ -112,9 +112,9 @@ function checkbrute($user_id, $mysqli) {
 }
 function login_check($mysqli) {
     // Check if all session variables are set 
-    echo "<pre>";
-    var_dump($_SESSION);
-    echo "</pre>\n";
+    // echo "<pre>";
+    // var_dump($_SESSION);
+    // echo "</pre>\n";
     if (isset($_SESSION['user_id'], 
                         $_SESSION['username'], 
                         $_SESSION['login_string'])) {
